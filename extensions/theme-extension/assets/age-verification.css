@@ -45,6 +45,11 @@
   font-weight: 600;
 }
 
+.idura-modal__title--loading {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
 .idura-modal__title--fail {
   color: #b3261e;
   font-weight: 600;
@@ -87,6 +92,7 @@
 }
 
 .idura-age-verify__prompt,
+.idura-age-verify__loading,
 .idura-age-verify__ok,
 .idura-age-verify__fail,
 .idura-age-verify__error {
@@ -103,6 +109,11 @@
 
 .idura-age-verify__ok .idura-age-verify__title {
   color: #1e7e34;
+  font-weight: 600;
+}
+
+.idura-age-verify__loading .idura-age-verify__title {
+  color: #1a1a1a;
   font-weight: 600;
 }
 

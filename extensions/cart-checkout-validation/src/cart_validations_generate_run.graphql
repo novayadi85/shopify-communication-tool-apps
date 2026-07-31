@@ -12,6 +12,13 @@ query Input {
     ageExpiresAt: attribute(key: "idura_age_expires_at") {
       value
     }
+    buyerIdentity {
+      customer {
+        ageVerification: metafield(namespace: "idura", key: "age_verification") {
+          value
+        }
+      }
+    }
     lines {
       quantity
     }

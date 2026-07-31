@@ -18,10 +18,20 @@
       "shop": {{ shop.permanent_domain | json }},
       "clientId": {{ block.settings.idura_client_id | json }},
       "country": {{ block.settings.country | json }},
+      "useMarketCountry": {{ block.settings.use_market_country | json }},
+      "marketCountry": {{ localization.country.iso_code | json }},
       "uiLanguage": {{ block.settings.ui_language | json }},
+      "useMarketLanguage": {{ block.settings.use_market_language | json }},
+      "marketLanguage": {{ localization.language.iso_code | json }},
       "minAge": {{ block.settings.min_age | json }},
       "redirectUri": {{ block.settings.redirect_uri | json }},
-      "verifyUrl": {{ block.settings.verify_url | json }}
+      "redirectUriMap": {{ block.settings.redirect_uri_map | json }},
+      "verifyUrl": {{ block.settings.verify_url | json }},
+      "customer": {
+        "id": {{ customer.id | json }},
+        "loggedIn": {% if customer %}true{% else %}false{% endif %},
+        "ageVerification": {{ customer.metafields.idura.age_verification.value | default: blank | json }}
+      }
     }
   </script>
 
@@ -34,6 +44,10 @@
       <button type="button" class="idura-age-verify__button" data-idura-login>
         {{ block.settings.button_text }}
       </button>
+    </div>
+
+    <div class="idura-age-verify__loading" data-idura-state="verifying" hidden>
+      <p class="idura-age-verify__title">{{ block.settings.loading_text }}</p>
     </div>
 
     <div class="idura-age-verify__ok" data-idura-state="verified" hidden>
@@ -82,7 +96,7 @@
     {
       "type": "select",
       "id": "country",
-      "label": "eID-land",
+      "label": "Fallback eID-land",
       "options": [
         { "value": "DK", "label": "Danmark (MitID)" },
         { "value": "SE", "label": "Sverige (BankID)" },
@@ -92,9 +106,16 @@
       "default": "SE"
     },
     {
+      "type": "checkbox",
+      "id": "use_market_country",
+      "label": "Brug aktivt marked som eID-land",
+      "info": "Hvis aktivt marked har en landekode, bruges den i stedet for fallback eID-land.",
+      "default": false
+    },
+    {
       "type": "select",
       "id": "ui_language",
-      "label": "Sprog på Idura login-side",
+      "label": "Fallback sprog på Idura login-side",
       "options": [
         { "value": "da", "label": "Dansk" },
         { "value": "en", "label": "Engelsk" },
@@ -104,6 +125,13 @@
         { "value": "de", "label": "Tysk" }
       ],
       "default": "sv"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_market_language",
+      "label": "Brug aktivt markedssprog til Idura",
+      "info": "Hvis aktivt storefront-sprog findes, bruges det som ui_locales i Idura i stedet for fallback sprog.",
+      "default": false
     },
     {
       "type": "select",
@@ -120,8 +148,14 @@
     {
       "type": "text",
       "id": "redirect_uri",
-      "label": "Redirect URI (lad stå tom for at bruge denne sides URL)",
-      "info": "Skal være registreret under Callback URLs i din Idura-applikations indstillinger"
+      "label": "Fallback Redirect URI",
+      "info": "Statisk fallback callback URL. Skal være registreret under Callback URLs i din Idura-applikation."
+    },
+    {
+      "type": "textarea",
+      "id": "redirect_uri_map",
+      "label": "Redirect URI map",
+      "info": "Valgfri JSON mapping per landekode, fx {\"SE\":\"https://jklfinewines.se/\",\"NL\":\"https://example.nl/\"}. Alle URL'er skal være registreret i Idura."
     },
     {
       "type": "header",
@@ -138,6 +172,12 @@
       "id": "button_text",
       "label": "Knaptekst",
       "default": "Bekræft alder"
+    },
+    {
+      "type": "text",
+      "id": "loading_text",
+      "label": "Tekst mens verifikation behandles",
+      "default": "Verifikation behandles. Vent venligst..."
     },
     {
       "type": "text",

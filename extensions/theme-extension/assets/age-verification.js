@@ -55,17 +55,74 @@
     var domain = config.domain;
     var shop = config.shop || window.location.hostname;
     var clientId = config.clientId;
-    var country = config.country || 'DK';
-    var uiLanguage = config.uiLanguage || 'da';
+    var country = resolveCountry(config);
+    var uiLanguage = resolveUiLanguage(config);
     var minAge = config.minAge || '18';
-    var redirectUri = config.redirectUri || window.location.href.split('?')[0].split('#')[0];
+    var currentPageUrl = window.location.href.split('?')[0].split('#')[0];
+    var redirectUri = resolveRedirectUri(config, country);
     var verifyUrl = config.verifyUrl || 'https://communication-tool.on-forge.com/api/idura/age/verify';
+    var customer = config.customer || {};
     var isModal = !!modal || gate.classList.contains('idura-age-verify--modal');
     var pendingCheckoutUrl = sessionStorage.getItem('idura_pending_checkout_url') || '';
 
     if (!domain || !clientId) {
       console.warn('[Idura Age Verification] Domain / Client ID belum diisi di settings.');
       return;
+    }
+
+    if (!redirectUri) {
+      console.warn('[Idura Age Verification] Redirect URI belum diisi untuk country ' + country + '. Isi Redirect URI map atau Fallback Redirect URI dengan URL statis yang terdaftar di Idura.');
+      return;
+    }
+
+    function resolveCountry(settings) {
+      var fallbackCountry = normalizeCountry(settings.country) || 'DK';
+      var marketCountry = normalizeCountry(settings.marketCountry);
+
+      if (settings.useMarketCountry === true && /^[A-Z]{2}$/.test(marketCountry)) {
+        return marketCountry;
+      }
+
+      return fallbackCountry;
+    }
+
+    function normalizeCountry(value) {
+      return String(value || '').trim().toUpperCase();
+    }
+
+    function resolveUiLanguage(settings) {
+      var fallbackLanguage = normalizeLanguage(settings.uiLanguage) || 'da';
+      var marketLanguage = normalizeLanguage(settings.marketLanguage);
+
+      if (settings.useMarketLanguage === true && /^[a-z]{2}$/.test(marketLanguage)) {
+        return marketLanguage;
+      }
+
+      return fallbackLanguage;
+    }
+
+    function normalizeLanguage(value) {
+      return String(value || '').trim().toLowerCase().split('-')[0];
+    }
+
+    function resolveRedirectUri(settings, resolvedCountry) {
+      var redirectUriMap = parseRedirectUriMap(settings.redirectUriMap);
+      return redirectUriMap[resolvedCountry] || settings.redirectUri || '';
+    }
+
+    function parseRedirectUriMap(value) {
+      if (!value) return {};
+
+      if (typeof value === 'object') {
+        return value;
+      }
+
+      try {
+        return JSON.parse(value);
+      } catch (error) {
+        console.warn('[Idura Age Verification] Redirect URI map JSON tidak valid.', error);
+        return {};
+      }
     }
 
     function setState(state) {
@@ -102,17 +159,68 @@
 
     function cleanUrl() {
       if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, document.title, redirectUri);
+        window.history.replaceState({}, document.title, currentPageUrl);
       }
     }
 
     function hasValidProof() {
+      if (hasValidCustomerProof()) return true;
+
+      return hasValidSessionProof();
+    }
+
+    function hasValidSessionProof() {
       try {
         var proof = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
         return proof.verified === true && proof.signature && proof.expires_at > Math.floor(Date.now() / 1000);
       } catch (error) {
         return false;
       }
+    }
+
+    function readCustomerProof() {
+      if (!customer.loggedIn || !customer.ageVerification) return {};
+
+      if (typeof customer.ageVerification === 'object') {
+        return customer.ageVerification;
+      }
+
+      try {
+        return JSON.parse(customer.ageVerification);
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function hasValidCustomerProof() {
+      var proof = readCustomerProof();
+      var requiredAge = Number.parseInt(minAge, 10);
+      var proofAge = Number.parseInt(proof.min_age || proof.minAge || '', 10);
+      var expiresAt = Number.parseInt(proof.expires_at || proof.expiresAt || '', 10);
+      var now = Math.floor(Date.now() / 1000);
+
+      if (proof.verified !== true || !proof.signature || !Number.isFinite(expiresAt) || expiresAt <= now) {
+        return false;
+      }
+
+      return !Number.isFinite(proofAge) || !Number.isFinite(requiredAge) || proofAge >= requiredAge;
+    }
+
+    function syncCustomerProofToCart() {
+      var proof = readCustomerProof();
+      return writeCartProof({
+        verified: true,
+        signature: proof.signature,
+        expires_at: proof.expires_at || proof.expiresAt,
+      });
+    }
+
+    function clearCartProof() {
+      return writeCartProof({
+        verified: false,
+        signature: '',
+        expires_at: '0',
+      });
     }
 
     function readStoredProof() {
@@ -237,6 +345,7 @@
 
     if (code) {
       openGate();
+      setState('verifying');
       var expectedState = sessionStorage.getItem(STATE_KEY);
       var verifier = sessionStorage.getItem(VERIFIER_KEY);
 
@@ -278,7 +387,10 @@
                 shop: shop,
                 domain: domain,
                 client_id: clientId,
+                country: country,
+                ui_language: uiLanguage,
                 min_age: minAge,
+                customer_id: customer.loggedIn ? customer.id : null,
                 page_url: window.location.href,
               }),
             })
@@ -327,12 +439,23 @@
       setState('error');
       cleanUrl();
     } else {
-      if (hasValidProof()) {
+      if (hasValidCustomerProof()) {
+        syncCustomerProofToCart()
+          .catch(function (error) {
+            console.warn('[Idura Age Verification] Customer proof sync gagal.', error);
+          })
+          .finally(completeGate);
+      } else if (hasValidSessionProof()) {
         writeCartProof(readStoredProof())
           .catch(function (error) {
             console.warn('[Idura Age Verification] Cart proof sync gagal.', error);
           })
           .finally(completeGate);
+      } else {
+        clearCartProof()
+          .catch(function (error) {
+            console.warn('[Idura Age Verification] Cart proof cleanup gagal.', error);
+          });
       }
     }
   });

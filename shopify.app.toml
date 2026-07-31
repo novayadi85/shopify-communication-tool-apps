@@ -1,13 +1,13 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "3f11a7d73ea245e56316b9e3fb67131f"
-name = "Communication Tool"
+client_id = "38627796d0f7702950539612bd57fb60"
+name = "Communication Apps"
 application_url = "https://communication-tool.on-forge.com/shopify/login"
 embedded = false
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_files,write_files,read_markets,write_markets,read_products,write_products,read_publications,write_publications,unauthenticated_read_content"
+scopes = "read_customer_events,read_checkout_and_accounts_configurations,write_checkout_and_accounts_configurations,write_checkouts,read_checkouts,read_customers,write_customers,read_files,write_files,read_markets,write_markets,read_products,write_products,read_publications,write_publications,customer_write_customers,customer_read_customers,unauthenticated_read_content"
 optional_scopes = [ "read_content", "write_content" ]
 use_legacy_install_flow = false
 

@@ -34,9 +34,32 @@ export function cartValidationsGenerateRun(input) {
 }
 
 function hasValidAgeProof(cart) {
-  const verified = cart?.ageVerified?.value === 'true';
-  const signature = cart?.ageSignature?.value || '';
-  const expiresAt = Number.parseInt(cart?.ageExpiresAt?.value || '', 10);
+  if (hasValidStoredProof({
+    verified: cart?.ageVerified?.value === 'true',
+    signature: cart?.ageSignature?.value || '',
+    expires_at: cart?.ageExpiresAt?.value || '',
+  })) {
+    return true;
+  }
+
+  return hasValidStoredProof(readCustomerProof(cart));
+}
+
+function readCustomerProof(cart) {
+  const value = cart?.buyerIdentity?.customer?.ageVerification?.value;
+  if (!value) return {};
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
+}
+
+function hasValidStoredProof(proof) {
+  const verified = proof?.verified === true;
+  const signature = proof?.signature || '';
+  const expiresAt = Number.parseInt(proof?.expires_at || proof?.expiresAt || '', 10);
   const now = Math.floor(Date.now() / 1000);
 
   return verified && signature.length > 0 && Number.isFinite(expiresAt) && expiresAt > now;

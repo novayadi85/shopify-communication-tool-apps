@@ -10,6 +10,11 @@ function input(overrides = {}) {
       ageVerified: { value: 'true' },
       ageSignature: { value: 'signed-proof' },
       ageExpiresAt: { value: String(future) },
+      buyerIdentity: {
+        customer: {
+          ageVerification: null,
+        },
+      },
       lines: [{ quantity: 1 }],
     },
     ...overrides,
@@ -27,6 +32,11 @@ describe('cart_validations_generate_run', () => {
         ageVerified: null,
         ageSignature: null,
         ageExpiresAt: null,
+        buyerIdentity: {
+          customer: {
+            ageVerification: null,
+          },
+        },
         lines: [{ quantity: 1 }],
       },
     }));
@@ -42,6 +52,11 @@ describe('cart_validations_generate_run', () => {
         ageVerified: null,
         ageSignature: null,
         ageExpiresAt: null,
+        buyerIdentity: {
+          customer: {
+            ageVerification: null,
+          },
+        },
         lines: [{ quantity: 1 }],
       },
     }));
@@ -57,11 +72,40 @@ describe('cart_validations_generate_run', () => {
         ageVerified: { value: 'true' },
         ageSignature: { value: 'signed-proof' },
         ageExpiresAt: { value: '1' },
+        buyerIdentity: {
+          customer: {
+            ageVerification: null,
+          },
+        },
         lines: [{ quantity: 1 }],
       },
     }));
 
     expect(result.operations).toHaveLength(1);
     vi.useRealTimers();
+  });
+
+  it('allows checkout when logged-in customer metafield proof is valid', () => {
+    const result = cartValidationsGenerateRun(input({
+      cart: {
+        ageVerified: null,
+        ageSignature: null,
+        ageExpiresAt: null,
+        buyerIdentity: {
+          customer: {
+            ageVerification: {
+              value: JSON.stringify({
+                verified: true,
+                signature: 'customer-signed-proof',
+                expires_at: future,
+              }),
+            },
+          },
+        },
+        lines: [{ quantity: 1 }],
+      },
+    }));
+
+    expect(result).toEqual({ operations: [] });
   });
 });
