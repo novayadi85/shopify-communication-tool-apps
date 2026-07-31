@@ -1,0 +1,4 @@
+{
+  "name": "Age verification checkout guard",
+  "description": "Blocks checkout until the cart has a valid age verification proof."
+}

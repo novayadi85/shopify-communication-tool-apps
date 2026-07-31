@@ -1,0 +1,162 @@
+{% comment %}
+  Age Verification checkout guard UI.
+  Pasang block ini di cart page/section. Setelah Idura sukses, block ini menulis
+  proof ke cart attributes agar cart-checkout-validation bisa melewati checkout.
+{% endcomment %}
+
+<div
+  class="idura-age-verify idura-age-verify--modal"
+  id="idura-age-verify-{{ block.id }}"
+  data-idura-age-gate
+  hidden
+  aria-modal="true"
+  role="dialog"
+>
+  <script type="application/json" data-idura-config>
+    {
+      "domain": {{ block.settings.idura_domain | json }},
+      "shop": {{ shop.permanent_domain | json }},
+      "clientId": {{ block.settings.idura_client_id | json }},
+      "country": {{ block.settings.country | json }},
+      "uiLanguage": {{ block.settings.ui_language | json }},
+      "minAge": {{ block.settings.min_age | json }},
+      "redirectUri": {{ block.settings.redirect_uri | json }},
+      "verifyUrl": {{ block.settings.verify_url | json }}
+    }
+  </script>
+
+  <div class="idura-age-verify__backdrop" data-idura-close></div>
+  <div class="idura-age-verify__box">
+    <button type="button" class="idura-age-verify__close" aria-label="Close" data-idura-close>&times;</button>
+
+    <div class="idura-age-verify__prompt" data-idura-state="idle">
+      <p class="idura-age-verify__title">{{ block.settings.prompt_text }}</p>
+      <button type="button" class="idura-age-verify__button" data-idura-login>
+        {{ block.settings.button_text }}
+      </button>
+    </div>
+
+    <div class="idura-age-verify__ok" data-idura-state="verified" hidden>
+      <p class="idura-age-verify__title">{{ block.settings.success_text }}</p>
+    </div>
+
+    <div class="idura-age-verify__fail" data-idura-state="rejected" hidden>
+      <p class="idura-age-verify__title">{{ block.settings.fail_text }}</p>
+    </div>
+
+    <div class="idura-age-verify__error" data-idura-state="error" hidden>
+      <p class="idura-age-verify__title">{{ block.settings.error_text }}</p>
+    </div>
+  </div>
+</div>
+
+<script src="{{ 'age-verification.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Aldersverifikation",
+  "target": "section",
+  "stylesheet": "age-verification.css",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Idura forbindelse"
+    },
+    {
+      "type": "text",
+      "id": "idura_domain",
+      "label": "Idura Domæne",
+      "info": "Eksempel: dittfirma.idura.broker"
+    },
+    {
+      "type": "text",
+      "id": "idura_client_id",
+      "label": "Idura Client ID"
+    },
+    {
+      "type": "text",
+      "id": "verify_url",
+      "label": "Backend verify URL",
+      "default": "https://shop-helper.dev.shopadjust-apps.com/api/idura/age/verify"
+    },
+    {
+      "type": "select",
+      "id": "country",
+      "label": "eID-land",
+      "options": [
+        { "value": "DK", "label": "Danmark (MitID)" },
+        { "value": "SE", "label": "Sverige (BankID)" },
+        { "value": "NO", "label": "Norge (BankID)" },
+        { "value": "FI", "label": "Finland (FTN)" }
+      ],
+      "default": "SE"
+    },
+    {
+      "type": "select",
+      "id": "ui_language",
+      "label": "Sprog på Idura login-side",
+      "options": [
+        { "value": "da", "label": "Dansk" },
+        { "value": "en", "label": "Engelsk" },
+        { "value": "sv", "label": "Svensk" },
+        { "value": "nb", "label": "Norsk" },
+        { "value": "fi", "label": "Finsk" },
+        { "value": "de", "label": "Tysk" }
+      ],
+      "default": "sv"
+    },
+    {
+      "type": "select",
+      "id": "min_age",
+      "label": "Minimumsalder",
+      "options": [
+        { "value": "15", "label": "15 år" },
+        { "value": "16", "label": "16 år" },
+        { "value": "18", "label": "18 år" },
+        { "value": "21", "label": "21 år" }
+      ],
+      "default": "18"
+    },
+    {
+      "type": "text",
+      "id": "redirect_uri",
+      "label": "Redirect URI (lad stå tom for at bruge denne sides URL)",
+      "info": "Skal være registreret under Callback URLs i din Idura-applikations indstillinger"
+    },
+    {
+      "type": "header",
+      "content": "Tekster"
+    },
+    {
+      "type": "text",
+      "id": "prompt_text",
+      "label": "Opfordringstekst",
+      "default": "Dette produkt har en aldersgrænse. Bekræft venligst din alder."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Knaptekst",
+      "default": "Bekræft alder"
+    },
+    {
+      "type": "text",
+      "id": "success_text",
+      "label": "Tekst ved godkendt verifikation",
+      "default": "Verifikation gennemført. Du opfylder alderskravet."
+    },
+    {
+      "type": "text",
+      "id": "fail_text",
+      "label": "Tekst ved afvist verifikation",
+      "default": "Beklager, du opfylder ikke alderskravet for dette produkt."
+    },
+    {
+      "type": "text",
+      "id": "error_text",
+      "label": "Tekst ved fejl",
+      "default": "Der opstod en fejl under verifikationen. Prøv venligst igen."
+    }
+  ]
+}
+{% endschema %}

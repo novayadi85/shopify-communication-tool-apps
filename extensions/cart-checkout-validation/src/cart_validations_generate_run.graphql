@@ -1,0 +1,19 @@
+query Input {
+  buyerJourney {
+    step
+  }
+  cart {
+    ageVerified: attribute(key: "idura_age_verified") {
+      value
+    }
+    ageSignature: attribute(key: "idura_age_signature") {
+      value
+    }
+    ageExpiresAt: attribute(key: "idura_age_expires_at") {
+      value
+    }
+    lines {
+      quantity
+    }
+  }
+}

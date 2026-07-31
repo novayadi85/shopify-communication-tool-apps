@@ -1,0 +1,147 @@
+{% comment %}
+  Age Verification - full-page modal gate (à la VerifyID.dk)
+  App Embed - aktifkan sekali di Theme Settings > App embeds, tampil otomatis di semua halaman
+  Taruh di: extensions/<extension-name>/blocks/age-verification-embed.liquid
+{% endcomment %}
+
+<div id="idura-age-modal" class="idura-modal" hidden aria-modal="true" role="dialog">
+  <div class="idura-modal__backdrop"></div>
+  <div class="idura-modal__box">
+    <div class="idura-modal__state" data-idura-state="idle">
+      <p class="idura-modal__title">{{ block.settings.prompt_text }}</p>
+      <button type="button" class="idura-modal__button" data-idura-login>
+        {{ block.settings.button_text }}
+      </button>
+    </div>
+
+    <div class="idura-modal__state" data-idura-state="verified" hidden>
+      <p class="idura-modal__title idura-modal__title--ok">{{ block.settings.success_text }}</p>
+    </div>
+
+    <div class="idura-modal__state" data-idura-state="rejected" hidden>
+      <p class="idura-modal__title idura-modal__title--fail">{{ block.settings.fail_text }}</p>
+    </div>
+
+    <div class="idura-modal__state" data-idura-state="error" hidden>
+      <p class="idura-modal__title idura-modal__title--error">{{ block.settings.error_text }}</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.IduraConfig = {
+    domain: {{ block.settings.idura_domain | json }},
+    shop: {{ shop.permanent_domain | json }},
+    clientId: {{ block.settings.idura_client_id | json }},
+    country: {{ block.settings.country | json }},
+    uiLanguage: {{ block.settings.ui_language | json }},
+    minAge: {{ block.settings.min_age | json }},
+    redirectUri: {{ block.settings.redirect_uri | json }},
+    verifyUrl: "https://communication-tool.on-forge.com/api/idura/age/verify"
+  };
+</script>
+
+<link rel="stylesheet" href="{{ 'age-verification.css' | asset_url }}">
+<script src="{{ 'age-verification.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Aldersverifikation",
+  "target": "body",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Idura forbindelse"
+    },
+    {
+      "type": "text",
+      "id": "idura_domain",
+      "label": "Idura Domæne",
+      "info": "Eksempel: dittfirma.idura.broker (findes under fanen General i Idura dashboard)"
+    },
+    {
+      "type": "text",
+      "id": "idura_client_id",
+      "label": "Idura Client ID"
+    },
+    {
+      "type": "text",
+      "id": "redirect_uri",
+      "label": "Redirect URI (lad stå tom for at bruge denne sides URL)",
+      "info": "Skal være registreret under Callback URLs i din Idura-applikations indstillinger"
+    },
+    {
+      "type": "select",
+      "id": "country",
+      "label": "eID-land",
+      "options": [
+        { "value": "DK", "label": "Danmark (MitID)" },
+        { "value": "SE", "label": "Sverige (BankID)" },
+        { "value": "NO", "label": "Norge (BankID)" },
+        { "value": "FI", "label": "Finland (FTN)" }
+      ],
+      "default": "SE"
+    },
+    {
+      "type": "select",
+      "id": "ui_language",
+      "label": "Sprog på Idura login-side",
+      "options": [
+        { "value": "da", "label": "Dansk" },
+        { "value": "en", "label": "Engelsk" },
+        { "value": "sv", "label": "Svensk" },
+        { "value": "nb", "label": "Norsk" },
+        { "value": "fi", "label": "Finsk" },
+        { "value": "de", "label": "Tysk" }
+      ],
+      "default": "sv"
+    },
+    {
+      "type": "select",
+      "id": "min_age",
+      "label": "Minimumsalder",
+      "options": [
+        { "value": "15", "label": "15 år" },
+        { "value": "16", "label": "16 år" },
+        { "value": "18", "label": "18 år" },
+        { "value": "21", "label": "21 år" }
+      ],
+      "default": "18"
+    },
+    {
+      "type": "header",
+      "content": "Tekster i modal"
+    },
+    {
+      "type": "text",
+      "id": "prompt_text",
+      "label": "Opfordringstekst",
+      "default": "For at handle på denne side skal du bekræfte din alder."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Knaptekst",
+      "default": "Bekræft alder med MitID"
+    },
+    {
+      "type": "text",
+      "id": "success_text",
+      "label": "Tekst ved godkendt verifikation",
+      "default": "Verifikation gennemført. Du opfylder alderskravet."
+    },
+    {
+      "type": "text",
+      "id": "fail_text",
+      "label": "Tekst ved afvist verifikation",
+      "default": "Beklager, du opfylder ikke alderskravet for at handle på denne side."
+    },
+    {
+      "type": "text",
+      "id": "error_text",
+      "label": "Tekst ved fejl",
+      "default": "Der opstod en fejl under verifikationen. Prøv venligst igen."
+    }
+  ]
+}
+{% endschema %}

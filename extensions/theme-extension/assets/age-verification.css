@@ -1,0 +1,189 @@
+/* Idura Age Verification - modal age gate styling
+   Taruh di: extensions/<extension-name>/assets/age-verification.css */
+
+.idura-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.idura-modal[hidden] {
+  display: none !important;
+}
+
+.idura-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+
+.idura-modal__box {
+  position: relative;
+  z-index: 1;
+  width: 90%;
+  max-width: 420px;
+  padding: 2rem 1.75rem;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.idura-modal__title {
+  margin: 0 0 1.25rem 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: #1a1a1a;
+}
+
+.idura-modal__title--ok {
+  color: #1e7e34;
+  font-weight: 600;
+}
+
+.idura-modal__title--fail {
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.idura-modal__title--error {
+  color: #8a5a00;
+  font-weight: 600;
+}
+
+.idura-modal__button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.idura-modal__button:hover {
+  opacity: 0.85;
+}
+
+.idura-modal__button:active {
+  opacity: 0.7;
+}
+
+.idura-age-verify {
+  display: block;
+  width: 100%;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid rgba(26, 26, 26, 0.16);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.idura-age-verify__prompt,
+.idura-age-verify__ok,
+.idura-age-verify__fail,
+.idura-age-verify__error {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.idura-age-verify__title {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.idura-age-verify__ok .idura-age-verify__title {
+  color: #1e7e34;
+  font-weight: 600;
+}
+
+.idura-age-verify__fail .idura-age-verify__title {
+  color: #b3261e;
+  font-weight: 600;
+}
+
+.idura-age-verify__error .idura-age-verify__title {
+  color: #8a5a00;
+  font-weight: 600;
+}
+
+.idura-age-verify__button {
+  width: fit-content;
+  min-height: 44px;
+  padding: 0.75rem 1.25rem;
+  border: 0;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.idura-age-verify__button:hover {
+  opacity: 0.86;
+}
+
+.idura-age-verify--modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  margin: 0;
+  padding: 1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.idura-age-verify__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+
+.idura-age-verify__box {
+  position: relative;
+  z-index: 1;
+  width: min(420px, 100%);
+  padding: 2rem 1.75rem;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.idura-age-verify__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.625rem;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.idura-age-verify--modal .idura-age-verify__button {
+  margin: 0 auto;
+}
+
+[hidden] {
+  display: none !important;
+}

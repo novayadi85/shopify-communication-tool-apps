@@ -1,0 +1,8 @@
+{
+  "name": "shopify-extensions",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@shopify/shopify_function": "^2.0.1"
+  }
+}
